@@ -2,8 +2,10 @@ package pget
 
 import (
 	"context"
+	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"runtime"
 	"time"
 )
@@ -18,6 +20,14 @@ func newDownloadClient(maxIdleConnsPerHost int) *http.Client {
 	tr.MaxIdleConns = 0 // no limit
 	tr.MaxIdleConnsPerHost = maxIdleConnsPerHost
 	tr.DisableCompression = true
+
+	// 设置代理
+	proxy, err := url.Parse("http://localhost:7897")
+	if err != nil {
+		log.Fatalf("invalid proxy URL: %v", err)
+	}
+	tr.Proxy = http.ProxyURL(proxy)
+
 	return &http.Client{
 		Transport: tr,
 	}
