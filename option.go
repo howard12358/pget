@@ -19,6 +19,7 @@ type Options struct {
 	Referer       string `short:"r" long:"referer"`
 	Update        bool   `long:"check-update"`
 	Trace         bool   `long:"trace"`
+	Proxy         string `short:"x" long:"proxy"`
 }
 
 func (opts *Options) parse(argv []string, version string) ([]string, error) {
@@ -46,6 +47,7 @@ func (opts Options) usage(version string) []byte {
   -t,  --timeout <seconds>      timeout of checking request in seconds (default 10s)
   -u,  --user-agent <agent>     identify as <agent>
   -r,  --referer <referer>      identify as <referer>
+  -x,  --proxy                  http(s) proxy URL, e.g. http://127.0.0.1:7897
   --check-update                check if there is update available
   --trace                       display detail error messages
 `, version)

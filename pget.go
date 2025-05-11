@@ -21,6 +21,7 @@ type Pget struct {
 	Output string
 	Procs  int
 	URLs   []string
+	Proxy  string
 
 	args      []string
 	timeout   int
@@ -44,7 +45,7 @@ func (pget *Pget) Run(ctx context.Context, version string, args []string) error 
 	}
 
 	// TODO(codehex): calc maxIdleConnsPerHost
-	client := newDownloadClient(16)
+	client := newDownloadClientByProxy(16, pget.Proxy)
 
 	target, err := Check(ctx, &CheckConfig{
 		URLs:    pget.URLs,
@@ -131,6 +132,10 @@ func (pget *Pget) Ready(version string, args []string) error {
 
 	if opts.Referer != "" {
 		pget.referer = opts.Referer
+	}
+
+	if opts.Proxy != "" {
+		pget.Proxy = opts.Proxy
 	}
 
 	return nil

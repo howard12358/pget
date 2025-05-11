@@ -2,7 +2,7 @@ package pget
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func newDownloadClient(maxIdleConnsPerHost int) *http.Client {
+func newDownloadClientByProxy(maxIdleConnsPerHost int, proxy string) *http.Client {
 	tr := http.DefaultTransport.(*http.Transport).Clone()
 	dialer := newDialRateLimiter(&net.Dialer{
 		Timeout:   30 * time.Second,
@@ -21,16 +21,23 @@ func newDownloadClient(maxIdleConnsPerHost int) *http.Client {
 	tr.MaxIdleConnsPerHost = maxIdleConnsPerHost
 	tr.DisableCompression = true
 
-	// 设置代理
-	proxy, err := url.Parse("http://localhost:7897")
-	if err != nil {
-		log.Fatalf("invalid proxy URL: %v", err)
+	if proxy != "" {
+		// Set up proxy
+		proxyUrl, err := url.Parse(proxy)
+		if err != nil {
+			fmt.Fprintf(stdout, "Invalid proxy URL: %v", err)
+		}
+		tr.Proxy = http.ProxyURL(proxyUrl)
 	}
-	tr.Proxy = http.ProxyURL(proxy)
 
 	return &http.Client{
 		Transport: tr,
 	}
+
+}
+
+func newDownloadClient(maxIdleConnsPerHost int) *http.Client {
+	return newDownloadClientByProxy(maxIdleConnsPerHost, "")
 }
 
 func newClient(client *http.Client) *http.Client {
